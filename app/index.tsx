@@ -1,11 +1,5 @@
 import { Image } from "expo-image";
-import {
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  ScrollView,
-  TextInput,
-} from "react-native";
+import { StyleSheet, View, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { HelloWave } from "@/components/hello-wave";
@@ -128,7 +122,6 @@ export default function HomeScreen() {
   // }, []);
   return (
     <ThemedView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <ThemedText type="title" style={styles.headerTitle}>
@@ -138,7 +131,6 @@ export default function HomeScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Hero Cards */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -155,7 +147,6 @@ export default function HomeScreen() {
           ))}
         </ScrollView>
 
-        {/* Categories */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
