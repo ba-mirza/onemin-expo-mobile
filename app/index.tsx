@@ -5,144 +5,50 @@ import {
   TouchableOpacity,
   ScrollView,
   RefreshControl,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { HelloWave } from "@/components/hello-wave";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { useEffect, useState } from "react";
-import { supabase } from "@/utils/supabase";
+import { useState } from "react";
 import { router } from "expo-router";
+import { useArticles } from "@/utils/hooks/useArticles";
+import { useCategories } from "@/utils/hooks/useCategories";
 
 export default function HomeScreen() {
-  const [refreshing, setRefreshing] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [lang] = useState<"ru" | "kz">("kz");
 
-  const onRefresh = async () => {
-    setRefreshing(true);
+  const { categories } = useCategories();
+  const {
+    articles,
+    loading,
+    refreshing,
+    loadingMore,
+    hasMore,
+    refresh,
+    loadMore,
+  } = useArticles({ lang, categorySlug: selectedCategory });
 
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+  const handleScroll = ({ nativeEvent }: any) => {
+    const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
 
-      console.log("Данные обновлены!");
-    } catch (error) {
-      console.error("Ошибка обновления:", error);
-    } finally {
-      setRefreshing(false);
+    const paddingToBottom = 180;
+    const isCloseToBottom =
+      layoutMeasurement.height + contentOffset.y >=
+      contentSize.height - paddingToBottom;
+
+    if (isCloseToBottom) {
+      loadMore();
     }
   };
 
-  const heroNews = [
-    {
-      id: 1,
-      title: "Share price of Tata Power jumps as sensex gains 1192.02 points",
-      image: "https://picsum.photos/400/300?random=1",
-    },
-    {
-      id: 2,
-      title: "At BJP's key meet, PM Modii setting goals for next 25 years",
-      image: "https://picsum.photos/400/300?random=2",
-    },
-    {
-      id: 3,
-      title: "At BJP's key meet, PM Modi setting goals for next 25 years",
-      image: "https://picsum.photos/400/300?random=3",
-    },
-  ];
+  const handleCategoryPress = (categorySlug: string) => {
+    setSelectedCategory(categorySlug);
+  };
 
-  const newsList = [
-    {
-      id: 3,
-      title: "Virat Kohli Becomes First Player To Complete 7,000 Runs For RCB",
-      time: "20 min ago",
-      views: "1200 views",
-      image: "https://picsum.photos/200/200?random=3",
-      slug: "virat-kohli-becomes-first-player-to-complete-7000-runs-for-rcb",
-    },
-    {
-      id: 4,
-      title: "Elon Musk talks about Twitter bots yet AGAIN in recent tweet",
-      time: "30 min ago",
-      views: "1356 views",
-      image: "https://picsum.photos/200/200?random=4",
-      slug: "elon-musk-talks-about-twitter-bots-yet-again-in-recent-tweet",
-    },
-    {
-      id: 5,
-      title: "Crypto markets recover; Bitcoin, Ethereum both see uptrend",
-      time: "2 hrs ago",
-      views: "1400 views",
-      image: "https://picsum.photos/200/200?random=5",
-      slug: "crypto-markets-recover-bitcoin-ethereum-both-see-uptrend",
-    },
-    {
-      id: 6,
-      title: "US launches $3.5 billion program to remove carbon from air",
-      time: "3 hrs ago",
-      views: "980 views",
-      image: "https://picsum.photos/200/200?random=6",
-      slug: "us-launches-35-billion-program-to-remove-carbon-from-air",
-    },
-    {
-      id: 7,
-      title: "US launches $3.5 billion program to remove carbon from air",
-      time: "3 hrs ago",
-      views: "980 views",
-      image: "https://picsum.photos/200/200?random=6",
-      slug: "us-launches-35-billion-program-to-remove-carbon-from-air",
-    },
-    {
-      id: 8,
-      title: "US launches $3.5 billion program to remove carbon from air",
-      time: "3 hrs ago",
-      views: "980 views",
-      image: "https://picsum.photos/200/200?random=6",
-      slug: "us-launches-35-billion-program-to-remove-carbon-from-air",
-    },
-    {
-      id: 9,
-      title: "US launches $3.5 billion program to remove carbon from air",
-      time: "3 hrs ago",
-      views: "980 views",
-      image: "https://picsum.photos/200/200?random=6",
-      slug: "us-launches-35-billion-program-to-remove-carbon-from-air",
-    },
-    {
-      id: 10,
-      title: "US launches $3.5 billion program to remove carbon from air",
-      time: "3 hrs ago",
-      views: "980 views",
-      image: "https://picsum.photos/200/200?random=6",
-    },
-  ];
-
-  const categories = [
-    "Барлығы",
-    "Саясат",
-    "Әлем",
-    "Дін",
-    "Сұхбат",
-    "Сараптама",
-  ];
-
-  const imageUrl =
-    "https://eysbvuebtdwqhpswiths.supabase.co/storage/v1/object/public/article-images/articles/50a18e9a-6d1a-4b8f-bc4f-7c9844b074dc.png";
-  // useEffect(() => {
-  //   const fetchArticles = async () => {
-  //     const { data: articles, error } = await supabase
-  //       .from("articles")
-  //       .select("*");
-
-  //     if (error) {
-  //       console.error(error);
-  //       return;
-  //     }
-
-  //     console.log({ articles: articles });
-  //   };
-
-  //   fetchArticles();
-  // }, []);
   return (
     <ThemedView style={styles.container}>
       <View style={styles.header}>
@@ -155,10 +61,12 @@ export default function HomeScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={400}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={onRefresh}
+            onRefresh={refresh}
             tintColor="#e74c3c" // ios color
             colors={["#e74c3c"]}
           />
@@ -170,11 +78,18 @@ export default function HomeScreen() {
           style={styles.heroContainer}
           contentContainerStyle={styles.heroContent}
         >
-          {heroNews.map((news) => (
-            <TouchableOpacity key={news.id} style={styles.heroCard}>
-              <Image source={{ uri: news.image }} style={styles.heroImage} />
+          {articles.slice(0, 3).map((article) => (
+            <TouchableOpacity
+              key={article.id}
+              style={styles.heroCard}
+              onPress={() => router.push(`/article/${article.slug}`)}
+            >
+              <Image
+                source={{ uri: article.preview_image }}
+                style={styles.heroImage}
+              />
               <View style={styles.heroOverlay}>
-                <ThemedText style={styles.heroText}>{news.title}</ThemedText>
+                <ThemedText style={styles.heroText}>{article.title}</ThemedText>
               </View>
             </TouchableOpacity>
           ))}
@@ -186,40 +101,52 @@ export default function HomeScreen() {
           style={styles.categoriesContainer}
           contentContainerStyle={styles.categoriesContent}
         >
-          {categories.map((category, index) => (
+          {categories.map((category) => (
             <TouchableOpacity
-              key={index}
+              key={category.id}
               style={[
                 styles.categoryButton,
-                index === 0 && styles.categoryButtonActive,
+                selectedCategory === category.slug &&
+                  styles.categoryButtonActive,
               ]}
+              onPress={() => handleCategoryPress(category.slug)}
             >
               <ThemedText
                 style={[
                   styles.categoryText,
-                  index === 0 && styles.categoryTextActive,
+                  selectedCategory === category.slug &&
+                    styles.categoryTextActive,
                 ]}
               >
-                {category}
+                {category.name}
               </ThemedText>
             </TouchableOpacity>
           ))}
         </ScrollView>
 
         <View style={styles.newsList}>
-          {newsList.map((news) => (
+          {articles.slice(3).map((article) => (
             <TouchableOpacity
-              onPress={() => router.push(`/article/${news.slug}`)}
-              key={news.id}
+              onPress={() => router.push(`/article/${article.slug}`)}
+              key={article.id}
               style={styles.newsCard}
             >
-              <Image source={{ uri: news.image }} style={styles.newsImage} />
+              <Image
+                source={{ uri: article.preview_image }}
+                style={styles.newsImage}
+              />
               <View style={styles.newsContent}>
-                <ThemedText style={styles.newsTitle}>{news.title}</ThemedText>
+                <ThemedText style={styles.newsTitle}>
+                  {article.title}
+                </ThemedText>
                 <View style={styles.newsFooter}>
                   <View style={styles.newsInfo}>
                     <Ionicons name="time-outline" size={14} color="#999" />
-                    <ThemedText style={styles.newsTime}>{news.time}</ThemedText>
+                    <ThemedText style={styles.newsTime}>
+                      {new Date(article.published_at).toLocaleDateString(
+                        "ru-RU",
+                      )}
+                    </ThemedText>
                     <Ionicons
                       name="eye-outline"
                       size={14}
@@ -227,7 +154,7 @@ export default function HomeScreen() {
                       style={{ marginLeft: 8 }}
                     />
                     <ThemedText style={styles.newsViews}>
-                      {news.views}
+                      {article.views_count}
                     </ThemedText>
                   </View>
                   <View style={styles.newsActions}>
@@ -242,6 +169,36 @@ export default function HomeScreen() {
               </View>
             </TouchableOpacity>
           ))}
+
+          {loadingMore && (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#e74c3c" />
+              <ThemedText style={styles.loadingText}>Загрузка...</ThemedText>
+            </View>
+          )}
+
+          {!loading && articles.length === 0 && (
+            <View style={styles.emptyContainer}>
+              <ThemedText style={styles.emptyText}>Нет новостей</ThemedText>
+            </View>
+          )}
+
+          {!hasMore && articles.length > 0 && (
+            <View style={styles.endContainer}>
+              <ThemedText style={styles.endText}>
+                Больше нет новостей
+              </ThemedText>
+            </View>
+          )}
+
+          {loading && articles.length === 0 && (
+            <View style={styles.initialLoadingContainer}>
+              <ActivityIndicator size="large" color="#e74c3c" />
+              <ThemedText style={styles.loadingText}>
+                Загрузка новостей...
+              </ThemedText>
+            </View>
+          )}
         </View>
       </ScrollView>
     </ThemedView>
@@ -378,5 +335,40 @@ const styles = StyleSheet.create({
   newsActions: {
     flexDirection: "row",
     alignItems: "center",
+  },
+  loadingContainer: {
+    paddingVertical: 20,
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 8,
+    fontSize: 14,
+    color: "#999",
+  },
+  endContainer: {
+    paddingVertical: 20,
+    alignItems: "center",
+  },
+  endText: {
+    fontSize: 14,
+    color: "#999",
+  },
+  emptyContainer: {
+    paddingVertical: 40,
+    alignItems: "center",
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#999",
+  },
+  initialLoadingContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.9)",
   },
 });
