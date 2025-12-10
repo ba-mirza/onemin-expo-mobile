@@ -1,15 +1,37 @@
 import { Image } from "expo-image";
-import { StyleSheet, View, TouchableOpacity, ScrollView } from "react-native";
+import {
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  ScrollView,
+  RefreshControl,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { HelloWave } from "@/components/hello-wave";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/utils/supabase";
 import { router } from "expo-router";
 
 export default function HomeScreen() {
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      console.log("Данные обновлены!");
+    } catch (error) {
+      console.error("Ошибка обновления:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const heroNews = [
     {
       id: 1,
@@ -131,7 +153,17 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#e74c3c" // ios color
+            colors={["#e74c3c"]}
+          />
+        }
+      >
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -300,7 +332,6 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   newsList: {
-    paddingHorizontal: 16,
     paddingTop: 16,
     gap: 4,
   },
