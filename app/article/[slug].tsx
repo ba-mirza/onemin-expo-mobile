@@ -7,16 +7,20 @@ import {
   ActivityIndicator,
   Share,
   Alert,
+  useWindowDimensions,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedView } from "@/components/themed-view";
 import { ThemedText } from "@/components/themed-text";
 import { useArticle } from "@/utils/hooks/useArticle";
+import RenderHtml from "react-native-render-html";
+import { tiptapToHtml } from "@/utils/tiptapParser";
 
 export default function ArticleScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
-  const { article, loading, error } = useArticle(slug || "");
+  const { article, loading, error } = useArticle(slug);
+  const { width } = useWindowDimensions();
 
   const handleShare = async () => {
     if (!article) return;
@@ -60,6 +64,8 @@ export default function ArticleScreen() {
       </ThemedView>
     );
   }
+
+  const htmlContent = tiptapToHtml(article.content);
 
   return (
     <ThemedView style={styles.container}>
@@ -119,11 +125,76 @@ export default function ArticleScreen() {
         )}
 
         <View style={styles.contentContainer}>
-          <ThemedText style={styles.content}>
-            {typeof article.content === "string"
-              ? article.content
-              : JSON.stringify(article.content)}
-          </ThemedText>
+          <RenderHtml
+            contentWidth={width - 40}
+            source={{ html: htmlContent }}
+            tagsStyles={{
+              p: {
+                fontSize: 16,
+                lineHeight: 26,
+                color: "#333",
+                marginBottom: 8,
+              },
+              h1: {
+                fontSize: 28,
+                fontWeight: "700",
+                color: "#000",
+                marginTop: 20,
+                marginBottom: 12,
+              },
+              h2: {
+                fontSize: 24,
+                fontWeight: "700",
+                color: "#000",
+                marginTop: 18,
+                marginBottom: 10,
+              },
+              h3: {
+                fontSize: 20,
+                fontWeight: "600",
+                color: "#000",
+                marginTop: 16,
+                marginBottom: 8,
+              },
+              strong: { fontWeight: "700", color: "#000" },
+              em: { fontStyle: "italic" },
+              ul: { marginLeft: 16, marginBottom: 12 },
+              ol: { marginLeft: 16, marginBottom: 12 },
+              li: {
+                fontSize: 16,
+                lineHeight: 26,
+                color: "#333",
+                marginBottom: 6,
+              },
+              blockquote: {
+                borderLeftWidth: 4,
+                borderLeftColor: "#b80000",
+                paddingLeft: 16,
+                marginLeft: 16,
+                fontStyle: "italic",
+                color: "#555",
+              },
+              code: {
+                backgroundColor: "#f5f5f5",
+                padding: 4,
+                borderRadius: 4,
+                fontFamily: "monospace",
+              },
+              pre: {
+                backgroundColor: "#f5f5f5",
+                padding: 12,
+                borderRadius: 8,
+                marginBottom: 12,
+              },
+              a: { color: "#b80000", textDecorationLine: "underline" },
+              img: {
+                width: "100%",
+                height: "auto",
+                borderRadius: 8,
+                marginVertical: 12,
+              },
+            }}
+          />
         </View>
 
         {article.tags && article.tags.length > 0 && (
@@ -262,8 +333,8 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   tagsContainer: {
+    marginTop: 16,
     paddingHorizontal: 20,
-    paddingTop: 16,
     paddingBottom: 12,
   },
   tagsTitle: {
