@@ -7,6 +7,7 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useEffect } from "react";
 import { supabase } from "@/utils/supabase";
+import { router } from "expo-router";
 
 export default function HomeScreen() {
   const heroNews = [
@@ -34,6 +35,7 @@ export default function HomeScreen() {
       time: "20 min ago",
       views: "1200 views",
       image: "https://picsum.photos/200/200?random=3",
+      slug: "virat-kohli-becomes-first-player-to-complete-7000-runs-for-rcb",
     },
     {
       id: 4,
@@ -41,6 +43,7 @@ export default function HomeScreen() {
       time: "30 min ago",
       views: "1356 views",
       image: "https://picsum.photos/200/200?random=4",
+      slug: "elon-musk-talks-about-twitter-bots-yet-again-in-recent-tweet",
     },
     {
       id: 5,
@@ -48,6 +51,7 @@ export default function HomeScreen() {
       time: "2 hrs ago",
       views: "1400 views",
       image: "https://picsum.photos/200/200?random=5",
+      slug: "crypto-markets-recover-bitcoin-ethereum-both-see-uptrend",
     },
     {
       id: 6,
@@ -55,37 +59,34 @@ export default function HomeScreen() {
       time: "3 hrs ago",
       views: "980 views",
       image: "https://picsum.photos/200/200?random=6",
+      slug: "us-launches-35-billion-program-to-remove-carbon-from-air",
     },
     {
-      id: 6,
+      id: 7,
       title: "US launches $3.5 billion program to remove carbon from air",
       time: "3 hrs ago",
       views: "980 views",
       image: "https://picsum.photos/200/200?random=6",
+      slug: "us-launches-35-billion-program-to-remove-carbon-from-air",
     },
     {
-      id: 6,
+      id: 8,
       title: "US launches $3.5 billion program to remove carbon from air",
       time: "3 hrs ago",
       views: "980 views",
       image: "https://picsum.photos/200/200?random=6",
+      slug: "us-launches-35-billion-program-to-remove-carbon-from-air",
     },
     {
-      id: 6,
+      id: 9,
       title: "US launches $3.5 billion program to remove carbon from air",
       time: "3 hrs ago",
       views: "980 views",
       image: "https://picsum.photos/200/200?random=6",
+      slug: "us-launches-35-billion-program-to-remove-carbon-from-air",
     },
     {
-      id: 6,
-      title: "US launches $3.5 billion program to remove carbon from air",
-      time: "3 hrs ago",
-      views: "980 views",
-      image: "https://picsum.photos/200/200?random=6",
-    },
-    {
-      id: 6,
+      id: 10,
       title: "US launches $3.5 billion program to remove carbon from air",
       time: "3 hrs ago",
       views: "980 views",
@@ -175,7 +176,11 @@ export default function HomeScreen() {
 
         <View style={styles.newsList}>
           {newsList.map((news) => (
-            <TouchableOpacity key={news.id} style={styles.newsCard}>
+            <TouchableOpacity
+              onPress={() => router.push(`/article/${news.slug}`)}
+              key={news.id}
+              style={styles.newsCard}
+            >
               <Image source={{ uri: news.image }} style={styles.newsImage} />
               <View style={styles.newsContent}>
                 <ThemedText style={styles.newsTitle}>{news.title}</ThemedText>
