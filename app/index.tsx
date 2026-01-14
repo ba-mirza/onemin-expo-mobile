@@ -147,15 +147,6 @@ export default function HomeScreen() {
                         "ru-RU",
                       )}
                     </ThemedText>
-                    <Ionicons
-                      name="eye-outline"
-                      size={14}
-                      color="#999"
-                      style={{ marginLeft: 8 }}
-                    />
-                    <ThemedText style={styles.newsViews}>
-                      {article.views_count}
-                    </ThemedText>
                   </View>
                   <View style={styles.newsActions}>
                     <Ionicons
@@ -185,9 +176,7 @@ export default function HomeScreen() {
 
           {!hasMore && articles.length > 0 && (
             <View style={styles.endContainer}>
-              <ThemedText style={styles.endText}>
-                Больше нет новостей
-              </ThemedText>
+              <ThemedText style={styles.endText}>oneminute.kz</ThemedText>
             </View>
           )}
 

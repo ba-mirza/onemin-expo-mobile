@@ -97,15 +97,6 @@ export default function ArticleScreen() {
                 year: "numeric",
               })}
             </ThemedText>
-            <Ionicons
-              name="eye-outline"
-              size={14}
-              color="#999"
-              style={{ marginLeft: 12 }}
-            />
-            <ThemedText style={styles.metaText}>
-              {article.views_count} просмотров
-            </ThemedText>
           </View>
         </View>
 
